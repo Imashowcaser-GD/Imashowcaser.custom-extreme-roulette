@@ -1,12 +1,14 @@
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.13.4)
 
-project(ExtremeCustomRoulette VERSION 1.0.0)
+# Configura el SDK de Geode antes de buscar el paquete
+include($ENV{GEODE_SDK}/cmake/link.cmake)
+
+project(ExtremeCustomRoulette)
 
 find_package(Geode REQUIRED)
 
 add_geode_mod(
-    ${PROJECT_NAME}
-    ID imashowcaser.extreme_custom_roulette
-    SOURCES 
-        src/main.cpp
+    lmashowcaser.custom-extreme-roulette
+    "1.0.0"
+    src/main.cpp
 )
