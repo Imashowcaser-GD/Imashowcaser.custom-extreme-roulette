@@ -1,0 +1,28 @@
+{
+	"geode": "3.3.0",
+	"id": "imashowcaser.extreme_custom_roulette",
+	"version": "1.0.0",
+	"name": "Extreme Custom Roulette",
+	"developer": "Imashowcaser",
+	"description": "Add roulettes in the game like the wheel of names roulette but with extreme demons youtubers like @thegroz, @nexylz and more use the wheel of names roulette but with this mod the roulette is now in GD, and using the level thumbnails mod for obviously show de thumbnail for the levels.",
+	"dependencies": [
+		{
+			"id": "geode.loader",
+			"version": ">=3.3.0",
+			"importance": "required"
+		},
+		{
+			"id": "irwansha.level_thumbnails",
+			"version": ">=1.0.0",
+			"importance": "recommended"
+		}
+	],
+	"settings": {
+		"levels-list": {
+			"name": "IDs Level List",
+			"description": "Type de Levels for the IDs in the list.",
+			"type": "text",
+			"default": "10565741, 62050358"
+		}
+	}
+}
