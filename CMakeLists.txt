@@ -6,7 +6,7 @@ project(ExtremeCustomRoulette)
 find_package(Geode REQUIRED)
 
 add_geode_mod(
-    lmashowcaser.custom-extreme-roulette
+    imashowcaser.extreme_custom_roulette
     "1.0.0"
     src/main.cpp
 )
