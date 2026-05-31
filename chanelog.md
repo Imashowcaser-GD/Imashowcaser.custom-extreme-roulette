@@ -6,4 +6,4 @@
 
 ## v0.1.0
 - Estructura base del proyecto en C++ usando el framework de Geode.
-- 
+- Configuración inicial del repositorio y dependencias de renderizado.
