@@ -31,14 +31,13 @@ public:
         return std::filesystem::exists(getRutaSlot(slot));
     }
 
-    // 🔥 LA FUNCIÓN DEL SHUFFLE (La pegamos aquí dentro)
+    // 🔥 LA FUNCIÓN DEL SHUFFLE
     void mezclarRuletaActiva() {
         if (nivelesActuales.empty()) {
             FLAlertLayer::create("Error", "¡No puedes mezclar una ruleta vacía!", "OK")->show();
             return;
         }
 
-        // Mezclamos el vector usando el reloj del celular/PC
         std::random_device rd;
         std::mt19937 g(rd());
         std::shuffle(nivelesActuales.begin(), nivelesActuales.end(), g);
@@ -48,53 +47,65 @@ public:
 };
 
 // ==========================================
-// 2. LA CAPA VISUAL (Tus dos imágenes de interfaz)
+// 2. LA CAPA VISUAL (Popup del Gestor de Ranuras)
 // ==========================================
 class RouletteMenuLayer : public Geode::Popup<> {
 protected:
     bool setup() override {
-        this->setTitle("Mis Ruletas");
         auto winSize = CCDirector::sharedDirector()->getWinSize();
         
-        // Colocamos tu cuadrícula base (Imagen 1)
-        auto fondoCuadricula = CCSprite::createWithSpriteFrameName("cuadrícula_base.png");
-        fondoCuadricula->setPosition(winSize / 2);
-        fondoCuadricula->setScale(0.8f);
-        m_mainLayer->addChild(fondoCuadricula);
+        // Ocultamos el fondo gris genérico de Geode para que luzca tu tablero limpio
+        this->m_bgSprite->setVisible(false);
+        
+        // 1. CAMBIA AQUÍ si tu archivo de tablero se llamaba diferente (Captura 1000018486)
+        auto fondoCuadricula = CCSprite::createWithSpriteFrameName("1000018486.png");
+        if (fondoCuadricula) {
+            fondoCuadricula->setPosition(winSize / 2);
+            fondoCuadricula->setScale(0.85f); // Ajuste de tamaño para que quepa en la pantalla
+            m_mainLayer->addChild(fondoCuadricula);
+        } else {
+            // Plan B de emergencia por si el nombre no coincide, para que no crashee
+            auto bgFallback = CCScale9Sprite::create("GJ_square02.png");
+            bgFallback->setContentSize({320, 240});
+            bgFallback->setPosition(winSize / 2);
+            m_mainLayer->addChild(bgFallback);
+        }
 
-        // Coordenadas para tus 4 bloques marrones
+        // Coordenadas calibradas para centrar las miniaturas en cada uno de tus 4 bloques marrones
         CCPoint posicionesSlots[4] = {
-            ccp(winSize.width / 2 - 70, winSize.height / 2 + 50), // Slot 1
-            ccp(winSize.width / 2 + 70, winSize.height / 2 + 50), // Slot 2
-            ccp(winSize.width / 2 - 70, winSize.height / 2 - 50), // Slot 3
-            ccp(winSize.width / 2 + 70, winSize.height / 2 - 50)  // Slot 4
+            ccp(winSize.width / 2 - 64, winSize.height / 2 + 60), // Slot 1 (Superior Izquierda)
+            ccp(winSize.width / 2 + 64, winSize.height / 2 + 60), // Slot 2 (Superior Derecha)
+            ccp(winSize.width / 2 - 64, winSize.height / 2 - 60), // Slot 3 (Inferior Izquierda)
+            ccp(winSize.width / 2 + 64, winSize.height / 2 - 60)  // Slot 4 (Inferior Derecha)
         };
 
-        // Renderizado dinámico según si existe el archivo o no (Imagen 2)
+        // Renderizado automático de miniaturas dentro de la cuadrícula
         for (int i = 0; i < 4; i++) {
             int numeroSlot = i + 1;
             CCPoint centroSlot = posicionesSlots[i];
 
             if (ExtremeRouletteManager::get()->existeSlot(numeroSlot)) {
-                // Si existe la ruleta, le dibujamos todo el pack encima:
                 
-                // Texto NAME ROULETTE
-                auto labelTitulo = CCLabelBMFont::create("NAME ROULETTE", "goldFont.fnt");
-                labelTitulo->setScale(0.5f);
+                // Texto indicador del número de ruleta cargada
+                auto labelTitulo = CCLabelBMFont::create((std::string("SLOT ") + std::to_string(numeroSlot)).c_str(), "goldFont.fnt");
+                labelTitulo->setScale(0.35f);
                 labelTitulo->setPosition(ccp(centroSlot.x, centroSlot.y + 40));
                 m_mainLayer->addChild(labelTitulo);
 
-                // El círculo cromático
-                auto ruletaSprite = CCSprite::createWithSpriteFrameName("ruleta_circulo.png");
-                ruletaSprite->setScale(0.6f);
-                ruletaSprite->setPosition(centroSlot);
-                m_mainLayer->addChild(ruletaSprite);
-
-                // La flecha verde
-                auto flechaSprite = CCSprite::createWithSpriteFrameName("flecha_puntero.png");
-                flechaSprite->setScale(0.6f);
-                flechaSprite->setPosition(ccp(centroSlot.x + 35, centroSlot.y)); 
-                m_mainLayer->addChild(flechaSprite);
+                // 2. CAMBIA AQUÍ si tu ruleta con marco verde se llamaba diferente (Captura 1000018487)
+                auto ruletaMini = CCSprite::createWithSpriteFrameName("1000018487.png");
+                if (ruletaMini) {
+                    ruletaMini->setScale(0.4f); // Escalado pequeño para encajar justo en el bloque marrón
+                    ruletaMini->setPosition(centroSlot);
+                    m_mainLayer->addChild(ruletaMini);
+                }
+            } else {
+                // Si el slot está vacío, mostramos un texto sutil
+                auto labelVacio = CCLabelBMFont::create("VACIO", "bigFont.fnt");
+                labelVacio->setScale(0.3f);
+                labelVacio->setOpacity(90);
+                labelVacio->setPosition(centroSlot);
+                m_mainLayer->addChild(labelVacio);
             }
         }
 
@@ -104,7 +115,8 @@ protected:
 public:
     static RouletteMenuLayer* create() {
         auto ret = new RouletteMenuLayer();
-        if (ret && ret->initAnchored(320, 240, "GJ_square01.png")) {
+        // Inicializa el Popup con el tamaño ideal para contener tu asset
+        if (ret && ret->initAnchored(340, 260)) {
             ret->autorelease();
             return ret;
         }
@@ -114,22 +126,35 @@ public:
 };
 
 // ==========================================
-// 3. HOOK EN EL MENÚ PRINCIPAL (Botón esquina izquierda)
+// 3. HOOK EN EL MENÚ PRINCIPAL (Botón inferior izquierdo)
 // ==========================================
 class $modify(MyMenuLayer, MenuLayer) {
     bool init() {
         if (!MenuLayer::init()) return false;
 
-        auto rouletteIcon = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png"); // Temporal
-        auto rouletteBtn = CCMenuItemSpriteExtra::create(
-            rouletteIcon,
-            this,
-            menu_selector(MyMenuLayer::onRouletteClick)
-        );
+        // Metemos el botón directamente al menú de abajo original del juego
+        auto bottomMenu = this->getChildByID("bottom-menu");
+        if (bottomMenu) {
+            
+            // 3. CAMBIA AQUÍ si tu botón de Shuffle o el ícono que elegiste se llamaba diferente
+            // Usamos provisionalmente el de Shuffle (1000018485) como botón de acceso si así lo deseas
+            auto rouletteIcon = CCSprite::createWithSpriteFrameName("1000018485.png");
+            
+            // Si el sprite no se encuentra por problemas de nombre, carga un botón nativo para evitar crasheos
+            if (!rouletteIcon) {
+                rouletteIcon = CCSprite::createWithSpriteFrameName("GJ_plusBtn_001.png");
+            }
 
-        auto menu = CCMenu::create(rouletteBtn, nullptr);
-        menu->setPosition({ 25.0f, 25.0f });
-        this->addChild(menu);
+            auto rouletteBtn = CCMenuItemSpriteExtra::create(
+                rouletteIcon,
+                this,
+                menu_selector(MyMenuLayer::onRouletteClick)
+            );
+
+            // Añadir al menú y reordenar el espacio de los botones automáticamente
+            bottomMenu->addChild(rouletteBtn);
+            bottomMenu->updateLayout();
+        }
 
         return true;
     }
