@@ -8,16 +8,8 @@ on:
 
 jobs:
   build:
-    strategy:
-      fail-fast: false
-      matrix:
-        config:
-          - name: Windows
-            os: windows-latest
-            platform: windows
-
-    name: ${{ matrix.config.name }}
-    runs-on: ${{ matrix.config.os }}
+    name: Windows Build
+    runs-on: windows-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -27,5 +19,3 @@ jobs:
         with:
           bindings: geode-sdk/bindings
           bindings-ref: main
-          platform: ${{ matrix.config.platform }}
-          
