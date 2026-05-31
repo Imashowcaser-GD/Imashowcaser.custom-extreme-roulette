@@ -14,6 +14,11 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Fix SSL Certificates
+        run: |
+          git config --global http.sslVerify false
+          echo "NODE_TLS_REJECT_UNAUTHORIZED=0" >> $GITHUB_ENV
+
       - name: Build Mod
         uses: geode-sdk/build-geode-mod@v3
         with:
